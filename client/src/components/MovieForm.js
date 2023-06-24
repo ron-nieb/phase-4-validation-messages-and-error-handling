@@ -14,22 +14,27 @@ function MovieForm() {
     female_director: false,
   });
 
-  function handleSubmit(e) {
+  const [errors, setErrors] = useState([]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    fetch("/movies", {
+    const response = await fetch("/movies", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(formData),
     })
-      .then((response) => response.json())
-      .then((newMovie) => console.log(newMovie));
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Movie created:", data);
+    } else {
+      setErrors(data.errors);
+    }
   }
 
   function handleChange(e) {
-    const value =
-      e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
     setFormData({
       ...formData,
       [e.target.id]: value,
@@ -125,7 +130,14 @@ function MovieForm() {
             />
           </label>
         </FormGroup>
-        <SubmitButton type="submit">Add Movie</SubmitButton>
+        {errors.length > 0 && (
+          <ul style={{ color: "red" }}>
+            {errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        )}
+  <SubmitButton type="submit">Add Movie</SubmitButton>
       </form>
     </Wrapper>
   );
